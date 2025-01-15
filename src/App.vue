@@ -1,6 +1,9 @@
 <template>
   <div>
     <Video />
+    <Video />
+    <Video />
+    <Video />
   </div>
 </template>
 

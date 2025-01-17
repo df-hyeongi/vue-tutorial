@@ -2,6 +2,11 @@ import { BaseMediaEventService } from "./base-media-event-service";
 import { MediaUtils } from "./media-utils";
 
 export class VideoEventService extends BaseMediaEventService {
+  private initializeSessionStartTime(): void {
+    if (!this.sessionStartTime) {
+      this.sessionStartTime = Date.now();
+    }
+  }
   createPlayEvent(video: HTMLVideoElement): {
     "file-name": string; // 파일 이름
     mediaUrl: string; // 미디어 URL
@@ -13,12 +18,9 @@ export class VideoEventService extends BaseMediaEventService {
     volume: number; // media 개체에 지정된 소리의 크기. 0~1 사이 값을 사용하며 소수점 둘째 자리까지 나타낸다(아래 소수점 버림).
     "full-screen": boolean; // video가 전체 화면 모드로 재생되는 것을 식별하는 데에 사용한다.
   } {
-    // playedDateTime initialize
-    if (!this.playedDateTime) {
-      this.playedDateTime = Date.now();
-    }
+    this.initializeSessionStartTime();
 
-    this.lastPlayedTime = MediaUtils.utilFloorToDecimals(video.currentTime);
+    this.currentPlayTime = MediaUtils.utilFloorToDecimals(video.currentTime);
 
     const isFullScreen = !!(
       document.fullscreenElement === video || (document as any).webkitFullscreenElement === video
@@ -32,7 +34,7 @@ export class VideoEventService extends BaseMediaEventService {
     const result = {
       "file-name": fileName,
       mediaUrl: mediaUrl,
-      time: this.lastPlayedTime,
+      time: this.currentPlayTime,
       "media-session-id": mediaSessionId,
       length,
       format,
@@ -49,13 +51,13 @@ export class VideoEventService extends BaseMediaEventService {
     const isPaused = video.paused;
     if (isEnded || isPaused) {
       this.appendPlayedSegments(this.playedSegments, [
-        this.lastPlayedTime,
+        this.currentPlayTime,
         MediaUtils.utilFloorToDecimals(video.currentTime),
       ]);
 
-      this.lastPlayedTime = MediaUtils.utilFloorToDecimals(video.currentTime);
+      this.currentPlayTime = MediaUtils.utilFloorToDecimals(video.currentTime);
       const result = {
-        duration: MediaUtils.getDuration(this.playedDateTime, Date.now()),
+        duration: MediaUtils.calculateSessionDuration(this.sessionStartTime, Date.now()),
         time: MediaUtils.utilFloorToDecimals(video.currentTime),
         progress:
           video.duration > 0 ? Math.floor((video.currentTime / video.duration) * 100) / 100 : 0,

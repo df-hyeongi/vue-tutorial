@@ -100,12 +100,12 @@ export class MediaUtils {
   /**
    * 페이지에 머문 시간 계산
    */
-  static getDuration(playedDateTime: number, pausedTime: number): string {
+  static calculateSessionDuration(sessionStartTime: number, sessionEndTime: number): string {
     const MILLISECONDS_IN_SECOND = 1000;
-    if (!playedDateTime) {
+    if (!sessionStartTime) {
       throw new Error("playedTime이 기록되지 않았습니다.");
     }
-    const sessionDuration = (pausedTime - playedDateTime) / MILLISECONDS_IN_SECOND;
+    const sessionDuration = (sessionEndTime - sessionStartTime) / MILLISECONDS_IN_SECOND;
     return `PT${sessionDuration}S`;
   }
 

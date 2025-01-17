@@ -1,8 +1,8 @@
 import type { MediaEvent } from "./media-event-interface";
 
 export abstract class BaseMediaEventService implements MediaEvent {
-  protected playedDateTime = 0;
-  protected lastPlayedTime = 0;
+  protected sessionStartTime = 0;
+  protected currentPlayTime = 0;
   protected timeFrom = 0;
   protected playedSegments: [number, number][] = [];
 
@@ -24,7 +24,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @returns
    */
   protected updateLastPlayedTime(time: number) {
-    this.lastPlayedTime = time;
+    this.currentPlayTime = time;
   }
 
   abstract createPlayEvent(media: HTMLMediaElement): any;

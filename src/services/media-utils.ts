@@ -103,36 +103,26 @@ export class MediaUtils {
   static calculateSessionDuration(sessionStartTime: number, sessionEndTime: number): string {
     const MILLISECONDS_IN_SECOND = 1000;
     if (!sessionStartTime) {
-      throw new Error("playedTime이 기록되지 않았습니다.");
+      // throw new Error("playedTime이 기록되지 않았습니다.");
     }
     const sessionDuration = (sessionEndTime - sessionStartTime) / MILLISECONDS_IN_SECOND;
     return `PT${sessionDuration}S`;
   }
 
-  /**
-   * played-segments을 명세서 문자열로 변환
-   * @param segments playedSegments
-   * @returns
-   */
+  // ISO 8601 duration 형식으로 변환 (PT{n}S)
+  // static getSessionDuration(sessionStartTime: number): string {
+  //   if (!sessionStartTime) return 'PT0S';
+  //   const durationInSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
+  //   return `PT${durationInSeconds}S`;
+  // }
+  // /**
+  //  * played-segments을 명세서 문자열로 변환
+  //  * @param segments playedSegments
+  //  * @returns
+  //  */
   static convertSegments(segments: [number, number][]): string {
     return segments
       .map(([start, end]) => `${start}[.]${end}`) // 각 [start, end]를 'start[.]end'로 변환
       .join("[,]"); // 배열 요소를 [,]로 연결
-  }
-
-  static createCommonInfo(media: HTMLMediaElement) {
-    const mediaUrl = media.currentSrc || media.src;
-    const fileName = this.utilMediaFileName(mediaUrl);
-    const length = this.utilFloorToDecimals(media.duration);
-    const speed = `${media.playbackRate.toFixed(1)}x`;
-    const volume = this.utilFloorToDecimals(media.volume);
-    return {
-      fileName,
-      mediaUrl,
-      format: this.utilVideoFormat(fileName),
-      length,
-      speed,
-      volume,
-    };
   }
 }

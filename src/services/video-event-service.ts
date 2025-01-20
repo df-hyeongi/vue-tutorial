@@ -22,6 +22,11 @@ export class VideoEventService extends BaseMediaEventService {
   }
 
   createPauseEvent(video: HTMLMediaElement) {
+    const isSeeking = video.seeking;
+    // 탐색중에는 pause 이벤트 무시
+    if (isSeeking) {
+      return
+    }
     const result = {
       ...this.createObjectData(video),
       ...this.createResultData(video),
@@ -30,12 +35,12 @@ export class VideoEventService extends BaseMediaEventService {
     console.log("result", result);
   }
 
-  createSeekedEvent(video: HTMLVideoElement) {
+  createSeekingEvent(video: HTMLMediaElement) {
     const currentTime = video.currentTime;
 
     const result = this.updateTimeFromAndCreateResult(currentTime);
     // TODO: 추후 return으로 처리해야함
-    console.log("Seeked Event", result);
+    console.log('result', result)
   }
 
   // TODO: createSeekedEvent에 맞는 결과값에 상응하는 함수명으로 수정하기

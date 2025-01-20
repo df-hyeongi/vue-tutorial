@@ -5,7 +5,7 @@
     @click="onClick"
     @play="onPlay"
     @pause="onPause"
-    @seeked="onSeeked"
+    @seeking="onSeeking"
     @loadedmetadata="onLoadedData"
     @volumechange="onControlChange"
     @ratechange="onControlChange"
@@ -14,6 +14,10 @@
     controls
   >
     <source src="./39611.mp4" type="video/mp4" />
+    <!-- <source
+      src="https://raw.githubusercontent.com/df-hyeongi/vue-tutorial/feat-video/src/components/39611.mp4"
+      type="video/mp4"
+    /> -->
   </video>
   <a href="https://www.google.com">google</a>
 </template>
@@ -38,8 +42,8 @@ function onPause(e: Event) {
   videoEventService.createPauseEvent(e.target as HTMLVideoElement);
 }
 
-function onSeeked(e: Event) {
-  videoEventService.createSeekedEvent(e.target as HTMLVideoElement);
+function onSeeking(e: Event) {
+  videoEventService.createSeekingEvent(e.target as HTMLVideoElement);
 }
 
 function onLoadedData(e: Event) {

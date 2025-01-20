@@ -100,7 +100,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
 
   abstract createPlayEvent(media: HTMLMediaElement): any;
   abstract createPauseEvent(media: HTMLMediaElement): any;
-  abstract createSeekedEvent(media: HTMLMediaElement): any;
+  abstract createSeekingEvent(media: HTMLMediaElement): any;
   abstract initPageIn(media: HTMLMediaElement): any;
   abstract initPageOut(media: HTMLMediaElement): any;
   abstract createControlChangeEvent(media: HTMLMediaElement): any;

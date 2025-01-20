@@ -20,8 +20,8 @@ export abstract class BaseMediaEventService implements MediaEvent {
 
   /**
    * object 데이터 생성
-   * @param media 
-   * @returns 
+   * @param media
+   * @returns
    */
   protected createObjectData(media: HTMLMediaElement) {
     const mediaUrl = media.currentSrc || media.src;
@@ -37,8 +37,8 @@ export abstract class BaseMediaEventService implements MediaEvent {
 
   /**
    * result 데이터 생성
-   * @param media 
-   * @returns 
+   * @param media
+   * @returns
    */
   protected createResultData(media: HTMLMediaElement) {
     return {
@@ -51,8 +51,8 @@ export abstract class BaseMediaEventService implements MediaEvent {
 
   /**
    * context 데이터 생성
-   * @param media 
-   * @returns 
+   * @param media
+   * @returns
    */
   protected createContextData(media: HTMLMediaElement) {
     const fileName = this.createObjectData(media).fileName;
@@ -79,13 +79,13 @@ export abstract class BaseMediaEventService implements MediaEvent {
   protected addPlayedSegment(currentTime: number): [number, number][] {
     const newSegment: [number, number] = [
       this.currentPlayTime,
-      MediaUtils.utilFloorToDecimals(currentTime)
+      MediaUtils.utilFloorToDecimals(currentTime),
     ];
 
     return [...this.playedSegments, newSegment];
   }
 
-  protected createMediaEndEvent(media: HTMLMediaElement) {
+  protected createPlayedSegments(media: HTMLMediaElement) {
     const currentTime = MediaUtils.utilFloorToDecimals(media.currentTime);
     const updatedSegments = this.addPlayedSegment(currentTime);
 
@@ -94,8 +94,6 @@ export abstract class BaseMediaEventService implements MediaEvent {
     this.playedSegments = updatedSegments;
 
     return {
-      ...this.createObjectData(media),
-      ...this.createResultData(media),
       "played-segments": [MediaUtils.convertSegments(this.playedSegments)],
     };
   }
@@ -105,4 +103,5 @@ export abstract class BaseMediaEventService implements MediaEvent {
   abstract createSeekedEvent(media: HTMLMediaElement): any;
   abstract initPageIn(media: HTMLMediaElement): any;
   abstract initPageOut(media: HTMLMediaElement): any;
+  abstract createControlChangeEvent(media: HTMLMediaElement): any;
 }

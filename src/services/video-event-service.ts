@@ -22,14 +22,17 @@ export class VideoEventService extends BaseMediaEventService {
   }
 
   createPauseEvent(video: HTMLMediaElement) {
-    const result = this.createMediaEndEvent(video)
+    const result = {
+      ...this.createObjectData(video),
+      ...this.createResultData(video),
+      ...this.createPlayedSegments(video),
+    };
     console.log("result", result);
   }
 
   createSeekedEvent(video: HTMLVideoElement) {
     const currentTime = video.currentTime;
 
-    // 상태 업데이트와 결과 생성 로직을 하나의 함수로 묶어 호출
     const result = this.updateTimeFromAndCreateResult(currentTime);
     // TODO: 추후 return으로 처리해야함
     console.log("Seeked Event", result);
@@ -46,13 +49,24 @@ export class VideoEventService extends BaseMediaEventService {
     };
   }
 
+  createControlChangeEvent(video: HTMLMediaElement) {
+    const { speed, volume, fullScreen } = this.createContextData(video);
+    const result = {
+      ...this.createObjectData(video),
+      speed,
+      volume,
+      fullScreen,
+    };
+    console.log("control change result", result);
+  }
+
   initPageIn(video: HTMLMediaElement) {
     this.initializeSessionStartTime();
     this.currentMedia = video;
     const result = {
       ...this.createObjectData(video),
       ...this.createContextData(video),
-    }
+    };
     console.log("initPageIn", result);
   }
 
@@ -62,9 +76,9 @@ export class VideoEventService extends BaseMediaEventService {
         ...this.createObjectData(this.currentMedia),
         ...this.createResultData(this.currentMedia),
         "session-duration": MediaUtils.convertSegments(this.playedSegments),
-      }
+      };
     }
-    this.currentMedia = null
-    this.sessionStartTime = 0
+    this.currentMedia = null;
+    this.sessionStartTime = 0;
   }
 }

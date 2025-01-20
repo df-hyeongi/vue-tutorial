@@ -7,9 +7,11 @@
     @pause="onPause"
     @seeked="onSeeked"
     @loadedmetadata="onLoadedData"
+    @volumechange="onControlChange"
+    @ratechange="onControlChange"
+    @fullscreenchange="onControlChange"
     ref="videoRef"
     controls
-    muted
   >
     <source src="./39611.mp4" type="video/mp4" />
   </video>
@@ -47,6 +49,10 @@ function onLoadedData(e: Event) {
 function handleBeforeUnload() {
   const result = videoEventService.initPageOut();
   localStorage.setItem("sessionStartTime", JSON.stringify(result));
+}
+
+function onControlChange(e: Event) {
+  videoEventService.createControlChangeEvent(e.target as HTMLVideoElement);
 }
 
 onMounted(() => {

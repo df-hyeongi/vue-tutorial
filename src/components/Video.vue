@@ -13,11 +13,11 @@
     ref="videoRef"
     controls
   >
-    <source src="./39611.mp4" type="video/mp4" />
-    <!-- <source
-      src="https://raw.githubusercontent.com/df-hyeongi/vue-tutorial/feat-video/src/components/39611.mp4"
+    <!-- <source src="./39611.mp4" type="video/mp4" /> -->
+    <source
+      src="https://d-lcms-res.ds.daekyo.in/resources/724/2024-08-21/39611.mp4?t=Mon Jan 20 2025 13:53:58 GMT+0900 (한국 표준시)"
       type="video/mp4"
-    /> -->
+    />
   </video>
   <a href="https://www.google.com">google</a>
 </template>

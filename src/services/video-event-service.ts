@@ -9,7 +9,7 @@ export class VideoEventService extends BaseMediaEventService {
   }
 
   createPlayEvent(video: HTMLVideoElement) {
-    this.initializeSessionStartTime();
+    if (!this.isReadyMedia(video)) return
 
     this.currentPlayTime = MediaUtils.utilFloorToDecimals(video.currentTime);
 
@@ -23,10 +23,9 @@ export class VideoEventService extends BaseMediaEventService {
 
   createPauseEvent(video: HTMLMediaElement) {
     const isSeeking = video.seeking;
-    // 탐색중에는 pause 이벤트 무시
-    if (isSeeking) {
-      return
-    }
+    // isSeeking: 재생 중에 탐색은 pause 이벤트 무시. 
+    if (isSeeking && !this.isReadyMedia(video)) return
+
     const result = {
       ...this.createObjectData(video),
       ...this.createResultData(video),
@@ -36,6 +35,8 @@ export class VideoEventService extends BaseMediaEventService {
   }
 
   createSeekingEvent(video: HTMLMediaElement) {
+    if (!this.isReadyMedia(video)) return
+
     const currentTime = video.currentTime;
 
     const result = this.updateTimeFromAndCreateResult(currentTime);

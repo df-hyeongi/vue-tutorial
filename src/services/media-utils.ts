@@ -33,7 +33,7 @@ export class MediaUtils {
    * @param fileName 파일명
    * @returns
    */
-  static utilVideoFormat(fileName: string) {
+  static utilMediaFormat(fileName: string) {
     const videoExtensions = [
       "mp4",
       "mkv",
@@ -68,10 +68,31 @@ export class MediaUtils {
       "ismv",
       "m3u8",
     ];
+
+    const audioExtensions = [
+      "mp3",
+      "wav",
+      "ogg",
+      "m4a",
+      "aac",
+      "wma",
+      "flac",
+      "alac",
+      "aiff",
+      "opus",
+      "mid",
+      "midi",
+      "amr",
+      "ac3",
+      "pcm",
+    ];
+
     const format = fileName.split(".").pop()?.toLocaleLowerCase();
     const isVideoFormat = videoExtensions.includes(format as string);
-    if (!isVideoFormat) {
-      throw new Error(`.${format}는 지원하지 않는 동영상 형식입니다.`);
+    const isAudioFormat = audioExtensions.includes(format as string);
+
+    if (!isVideoFormat && !isAudioFormat) {
+      throw new Error(`.${format}는 지원하지 않는 미디어 형식입니다.`);
     }
     return format as string;
   }

@@ -43,7 +43,7 @@ function onPause(e: Event) {
 }
 
 function onSeeking(e: Event) {
-  videoEventService.createSeekingEvent(e.target as HTMLVideoElement);
+  videoEventService.createSeekedEvent(e.target as HTMLVideoElement);
 }
 
 function onLoadedData(e: Event) {

@@ -5,7 +5,8 @@ export abstract class BaseMediaEventService implements MediaEvent {
   // TODO: 전역으로 사용되는 변수들 최대한 제거해서 구현
   protected currentMedia: HTMLMediaElement | null = null;
   protected sessionStartTime = 0;
-  protected lastPlayTime = 0;
+  protected playTime = 0;
+  protected pausePlayTime = 0;
   protected timeFrom = 0;
   protected playedSegments: [number, number][] = [];
 
@@ -36,8 +37,17 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @param media
    * @returns
    */
-  protected updateLastPlayedTime(time: number) {
-    this.lastPlayTime = MediaUtils.utilFloorToDecimals(time);
+  protected updatePlayTime(time: number) {
+    this.playTime = MediaUtils.utilFloorToDecimals(time);
+  }
+
+  /**
+   * pause시 플레이타임 업데이트
+   * @param media
+   * @returns
+   */
+  protected updatePausePlayTime(time: number) {
+    this.pausePlayTime = MediaUtils.utilFloorToDecimals(time);
   }
 
   /**
@@ -68,22 +78,21 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * 재생된 구간 업데이트
    * @param currentTime 현재 재생 시간
    */
-  protected updatePlayedSegments(currentTime: number): void {
+  protected updatePlayedSegments(): void {
     const playedSegments = this.addPlayedSegment(
       this.playedSegments,
-      this.lastPlayTime,
-      currentTime
+      this.playTime,
+      this.pausePlayTime
     );
     this.playedSegments = playedSegments;
   }
 
   // TODO: createSeekedEvent에 맞는 결과값에 상응하는 함수명으로 수정하기
   protected createTimeFromTimeTo(currentTime: number) {
-    const previousTimeFrom = this.timeFrom;
     this.updateTimefrom(currentTime)
 
     return {
-      "time-from": MediaUtils.utilFloorToDecimals(previousTimeFrom),
+      "time-from": MediaUtils.utilFloorToDecimals(this.playTime),
       "time-to": MediaUtils.utilFloorToDecimals(currentTime),
     };
   }
@@ -121,7 +130,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @returns
    */
   protected createResultData(media: HTMLMediaElement) {
-    this.updatePlayedSegments(media.currentTime);
+    this.updatePlayedSegments();
     const [startTime, endTime] = this.playedSegments[this.playedSegments.length - 1];
     return {
       duration: endTime - startTime,
@@ -147,7 +156,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
     );
     return {
       length,
-      format: MediaUtils.utilVideoFormat(fileName),
+      format: MediaUtils.utilMediaFormat(fileName),
       speed,
       volume,
       fullScreen: isFullScreen,
@@ -156,7 +165,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
 
   abstract createPlayEvent(media: HTMLMediaElement): any;
   abstract createPauseEvent(media: HTMLMediaElement): any;
-  abstract createSeekingEvent(media: HTMLMediaElement): any;
+  abstract createSeekedEvent(media: HTMLMediaElement): any;
   abstract initPageIn(media: HTMLMediaElement): any;
   abstract initPageOut(media: HTMLMediaElement): any;
   abstract createControlChangeEvent(media: HTMLMediaElement): any;

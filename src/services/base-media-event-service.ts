@@ -5,17 +5,97 @@ export abstract class BaseMediaEventService implements MediaEvent {
   // TODO: 전역으로 사용되는 변수들 최대한 제거해서 구현
   protected currentMedia: HTMLMediaElement | null = null;
   protected sessionStartTime = 0;
-  protected currentPlayTime = 0;
+  protected lastPlayTime = 0;
   protected timeFrom = 0;
   protected playedSegments: [number, number][] = [];
 
+  protected initSessionStartTime(): void {
+    if (!this.sessionStartTime) {
+      this.sessionStartTime = Date.now();
+    }
+  }
+
   /**
-   * 현재 재생 시간 업데이트
+   * init시에 담는 media 객체
+   * @param media 
+   */
+  protected initCurrentMedia(media: HTMLMediaElement) {
+    this.currentMedia = media
+  }
+
+  /**
+   * 현재 담은 media 반환
+   * @returns
+   */
+  protected get getCurrentMedia() {
+    return this.currentMedia
+  }
+
+  /**
+   * 마지막 재생 시간 업데이트
    * @param media
    * @returns
    */
   protected updateLastPlayedTime(time: number) {
-    this.currentPlayTime = time;
+    this.lastPlayTime = MediaUtils.utilFloorToDecimals(time);
+  }
+
+  /**
+   * 탐색 시작 시간 업데이트
+   * @param currentTime 
+   */
+  protected updateTimefrom(currentTime: number) {
+    this.timeFrom = MediaUtils.utilFloorToDecimals(currentTime)
+  }
+
+  /**
+   * 재생 구간을 추적하고 새로운 세그먼트 배열을 반환
+   * @param playedSegments 기존 재생 구간 배열
+   * @param lastPlayTime 이전 재생 시간
+   * @param currentTime 현재 재생 시간
+   * @returns 업데이트된 세그먼트 배열
+   */
+  protected addPlayedSegment(playedSegments: [number, number][], lastPlayTime: number, currentTime: number): [number, number][] {
+    const newSegment: [number, number] = [
+      lastPlayTime,
+      MediaUtils.utilFloorToDecimals(currentTime),
+    ];
+
+    return [...playedSegments, newSegment];
+  }
+
+  /**
+   * 재생된 구간 업데이트
+   * @param currentTime 현재 재생 시간
+   */
+  protected updatePlayedSegments(currentTime: number): void {
+    const playedSegments = this.addPlayedSegment(
+      this.playedSegments,
+      this.lastPlayTime,
+      currentTime
+    );
+    this.playedSegments = playedSegments;
+  }
+
+  // TODO: createSeekedEvent에 맞는 결과값에 상응하는 함수명으로 수정하기
+  protected createTimeFromTimeTo(currentTime: number) {
+    const previousTimeFrom = this.timeFrom;
+    this.updateTimefrom(currentTime)
+
+    return {
+      "time-from": MediaUtils.utilFloorToDecimals(previousTimeFrom),
+      "time-to": MediaUtils.utilFloorToDecimals(currentTime),
+    };
+  }
+
+  /**
+   * 미디어 준비 상태 확인
+   * https://developer.mozilla.org/ko/docs/Web/API/HTMLMediaElement/readyState
+   * @param media 
+   * @returns 
+   */
+  protected isReadyMedia(media: HTMLMediaElement) {
+    return media.readyState > 2;
   }
 
   /**
@@ -41,11 +121,14 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @returns
    */
   protected createResultData(media: HTMLMediaElement) {
+    this.updatePlayedSegments(media.currentTime);
+    const [startTime, endTime] = this.playedSegments[this.playedSegments.length - 1];
     return {
-      duration: MediaUtils.calculateSessionDuration(this.sessionStartTime, Date.now()),
+      duration: endTime - startTime,
       time: MediaUtils.utilFloorToDecimals(media.currentTime),
       progress:
         media.duration > 0 ? Math.floor((media.currentTime / media.duration) * 100) / 100 : 0,
+      "played-segments": [MediaUtils.convertSegments(this.playedSegments)],
     };
   }
 
@@ -68,33 +151,6 @@ export abstract class BaseMediaEventService implements MediaEvent {
       speed,
       volume,
       fullScreen: isFullScreen,
-    };
-  }
-
-  /**
-   * 재생 구간을 추적하고 새로운 세그먼트 배열을 반환
-   * @param currentTime 현재 재생 시간
-   * @returns 업데이트된 세그먼트 배열
-   */
-  protected addPlayedSegment(currentTime: number): [number, number][] {
-    const newSegment: [number, number] = [
-      this.currentPlayTime,
-      MediaUtils.utilFloorToDecimals(currentTime),
-    ];
-
-    return [...this.playedSegments, newSegment];
-  }
-
-  protected createPlayedSegments(media: HTMLMediaElement) {
-    const currentTime = MediaUtils.utilFloorToDecimals(media.currentTime);
-    const updatedSegments = this.addPlayedSegment(currentTime);
-
-    // 상태 업데이트
-    this.currentPlayTime = currentTime;
-    this.playedSegments = updatedSegments;
-
-    return {
-      "played-segments": [MediaUtils.convertSegments(this.playedSegments)],
     };
   }
 

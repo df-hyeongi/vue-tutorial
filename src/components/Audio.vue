@@ -1,5 +1,5 @@
 <template>
-  <video
+  <audio
     width="500"
     height="500"
     @click="onClick"
@@ -10,15 +10,10 @@
     @volumechange="onControlChange"
     @ratechange="onControlChange"
     @fullscreenchange="onControlChange"
-    ref="videoRef"
     controls
   >
-    <source src="./39611.mp4" type="video/mp4" />
-    <!-- <source
-      src="https://d-lcms-res.ds.daekyo.in/resources/724/2024-08-21/39611.mp4?t=Mon Jan 20 2025 13:53:58 GMT+0900 (한국 표준시)"
-      type="video/mp4"
-    /> -->
-  </video>
+    <source src="./19B.mp3" type="audio/mp3" />
+  </audio>
   <a href="https://www.google.com">google</a>
 </template>
 

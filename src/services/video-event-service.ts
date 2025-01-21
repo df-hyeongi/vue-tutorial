@@ -2,20 +2,27 @@ import { BaseMediaEventService } from "./base-media-event-service";
 import { MediaUtils } from "./media-utils";
 
 export class VideoEventService extends BaseMediaEventService {
-  private initializeSessionStartTime(): void {
-    if (!this.sessionStartTime) {
-      this.sessionStartTime = Date.now();
+  private debounceTimeout: number | null = null;
+
+  private debounce(callback: () => void, delay: number = 300) {
+    if (this.debounceTimeout) {
+      window.clearTimeout(this.debounceTimeout);
     }
+
+    this.debounceTimeout = window.setTimeout(() => {
+      callback();
+      this.debounceTimeout = null;
+    }, delay);
   }
 
   createPlayEvent(video: HTMLVideoElement) {
     if (!this.isReadyMedia(video)) return
 
-    this.currentPlayTime = MediaUtils.utilFloorToDecimals(video.currentTime);
+    this.updateLastPlayedTime(video.currentTime)
 
     const result = {
       ...this.createObjectData(video),
-      time: this.currentPlayTime,
+      time: video.currentTime
     };
     console.log("result", result);
     return result;
@@ -26,10 +33,10 @@ export class VideoEventService extends BaseMediaEventService {
     // isSeeking: 재생 중에 탐색은 pause 이벤트 무시. 
     if (isSeeking && !this.isReadyMedia(video)) return
 
+
     const result = {
       ...this.createObjectData(video),
       ...this.createResultData(video),
-      ...this.createPlayedSegments(video),
     };
     console.log("result", result);
   }
@@ -37,22 +44,9 @@ export class VideoEventService extends BaseMediaEventService {
   createSeekingEvent(video: HTMLMediaElement) {
     if (!this.isReadyMedia(video)) return
 
-    const currentTime = video.currentTime;
-
-    const result = this.updateTimeFromAndCreateResult(currentTime);
+    const result = this.createTimeFromTimeTo(video.currentTime);
     // TODO: 추후 return으로 처리해야함
-    console.log('result', result)
-  }
-
-  // TODO: createSeekedEvent에 맞는 결과값에 상응하는 함수명으로 수정하기
-  private updateTimeFromAndCreateResult(currentTime: number) {
-    const previousTimeFrom = this.timeFrom;
-    this.timeFrom = currentTime;
-
-    return {
-      "time-from": MediaUtils.utilFloorToDecimals(previousTimeFrom),
-      "time-to": MediaUtils.utilFloorToDecimals(currentTime),
-    };
+    console.log('seeking result', result)
   }
 
   createControlChangeEvent(video: HTMLMediaElement) {
@@ -67,8 +61,8 @@ export class VideoEventService extends BaseMediaEventService {
   }
 
   initPageIn(video: HTMLMediaElement) {
-    this.initializeSessionStartTime();
-    this.currentMedia = video;
+    this.initSessionStartTime();
+    this.initCurrentMedia(video)
     const result = {
       ...this.createObjectData(video),
       ...this.createContextData(video),
@@ -77,10 +71,10 @@ export class VideoEventService extends BaseMediaEventService {
   }
 
   initPageOut() {
-    if (this.currentMedia) {
+    if (this.getCurrentMedia) {
       return {
-        ...this.createObjectData(this.currentMedia),
-        ...this.createResultData(this.currentMedia),
+        ...this.createObjectData(this.getCurrentMedia),
+        ...this.createResultData(this.getCurrentMedia),
         "session-duration": MediaUtils.convertSegments(this.playedSegments),
       };
     }

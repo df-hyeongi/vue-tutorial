@@ -6,6 +6,7 @@ export class MediaEventService extends BaseMediaEventService {
   createPlayEvent(media: HTMLMediaElement) {
     if (!this.isReadyMedia(media)) return
 
+    this.updateTimeFrom(this.playTime)
     this.updatePlayTime(media.currentTime)
 
     const result = {
@@ -21,13 +22,14 @@ export class MediaEventService extends BaseMediaEventService {
     // isSeeking: 재생 중에 탐색은 pause 이벤트 무시. 
     if (isSeeking && !this.isReadyMedia(media)) return
 
+    this.updateTimeFrom(media.currentTime)
     this.updatePausePlayTime(media.currentTime)
 
     const result = {
       ...this.createObjectData(media),
       ...this.createResultData(media),
     };
-    console.log("result", result);
+    console.log("pause result", result);
   }
 
   createSeekedEvent(media: HTMLMediaElement) {

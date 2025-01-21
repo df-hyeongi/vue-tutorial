@@ -6,8 +6,8 @@ export abstract class BaseMediaEventService implements MediaEvent {
   protected currentMedia: HTMLMediaElement | null = null;
   protected sessionStartTime = 0;
   protected playTime = 0;
-  protected pausePlayTime = 0;
   protected timeFrom = 0;
+  protected pausePlayTime = 0;
   protected playedSegments: [number, number][] = [];
 
   protected initSessionStartTime(): void {
@@ -42,20 +42,21 @@ export abstract class BaseMediaEventService implements MediaEvent {
   }
 
   /**
+   * timeFrom 업데이트 
+   * @param media
+   * @returns
+   */
+  protected updateTimeFrom(time: number) {
+    this.timeFrom = MediaUtils.utilFloorToDecimals(time)
+  }
+
+  /**
    * pause시 플레이타임 업데이트
    * @param media
    * @returns
    */
   protected updatePausePlayTime(time: number) {
     this.pausePlayTime = MediaUtils.utilFloorToDecimals(time);
-  }
-
-  /**
-   * 탐색 시작 시간 업데이트
-   * @param currentTime 
-   */
-  protected updateTimefrom(currentTime: number) {
-    this.timeFrom = MediaUtils.utilFloorToDecimals(currentTime)
   }
 
   /**
@@ -89,11 +90,9 @@ export abstract class BaseMediaEventService implements MediaEvent {
 
   // TODO: createSeekedEvent에 맞는 결과값에 상응하는 함수명으로 수정하기
   protected createTimeFromTimeTo(currentTime: number) {
-    this.updateTimefrom(currentTime)
-
     return {
-      "time-from": MediaUtils.utilFloorToDecimals(this.playTime),
-      "time-to": MediaUtils.utilFloorToDecimals(currentTime),
+      "time-from": MediaUtils.utilFloorToDecimals(this.timeFrom),
+      "time-to": MediaUtils.utilFloorToDecimals(MediaUtils.utilFloorToDecimals(currentTime)),
     };
   }
 

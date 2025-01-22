@@ -1,28 +1,32 @@
 import { BaseMediaEventService } from "./base-media-event-service";
 import { Debouncer } from "./debounce";
+import { MediaUtils } from "./media-utils";
 
 export class MediaEventService extends BaseMediaEventService {
+  // play에서는 media.seeking 상태가 변하지 않음 
   createPlayEvent(media: HTMLMediaElement) {
-    if (!this.isReadyMedia(media)) return
+    console.log('createPlayEvent', media.seeking)
+    if (this.seeking) return
 
-    this.updateTimeFrom(this.playTime)
-    this.updatePlayTime(media.currentTime)
+    this.timeFrom = this.playTime
+    this.playTime = media.currentTime
 
     const result = {
       ...this.createObjectData(media),
-      time: media.currentTime
+      ...this.createContextData(media),
+      ...this.createTimeData(media),
     };
-    console.log("result", result);
+    console.log("play", result);
     return result;
   }
 
+  // pause에서는 media.seeking 상태가 변함
   createPauseEvent(media: HTMLMediaElement) {
-    const isSeeking = media.seeking;
-    // isSeeking: 재생 중에 탐색은 pause 이벤트 무시. 
-    if (isSeeking && !this.isReadyMedia(media)) return
+    console.log('createPauseEvent', media.seeking)
+    if (this.seeking || media.seeking) return
 
-    this.updateTimeFrom(media.currentTime)
-    this.updatePausePlayTime(media.currentTime)
+    this.timeFrom = media.currentTime
+    this.pausePlayTime = media.currentTime
 
     const result = {
       ...this.createObjectData(media),
@@ -33,16 +37,19 @@ export class MediaEventService extends BaseMediaEventService {
   }
 
   createSeekedEvent(media: HTMLMediaElement) {
-    if (!this.isReadyMedia(media)) return;
-
     Debouncer.debounce(() => {
+      this.seeking = media.seeking
       const result = {
         ...this.createObjectData(media),
         ...this.createTimeFromTimeTo(media.currentTime)
       }
       // TODO: 추후 return으로 처리해야함
-      console.log('seeking result', result)
+      // console.log('seeking result', result)
     }, 300)
+  }
+
+  createSeekingEvent(media: HTMLMediaElement) {
+    this.seeking = media.seeking
   }
 
   createControlChangeEvent(media: HTMLMediaElement) {
@@ -54,7 +61,7 @@ export class MediaEventService extends BaseMediaEventService {
         volume,
         fullScreen,
       };
-      console.log("control change result", result);
+      // console.log("control change result", result);
     }, 300)
   }
 
@@ -65,17 +72,17 @@ export class MediaEventService extends BaseMediaEventService {
       ...this.createObjectData(media),
       ...this.createContextData(media),
     };
-    console.log("initPageIn", result);
+    // console.log("initPageIn", result);
   }
 
   initPageOut() {
-    if (this.getCurrentMedia) {
+    if (this.currentMedia) {
       const result = {
-        ...this.createObjectData(this.getCurrentMedia),
-        ...this.createResultData(this.getCurrentMedia),
-        "played-segments": this.getConvertedPlayedSegments,
+        ...this.createObjectData(this.currentMedia),
+        ...this.createResultData(this.currentMedia),
+        "played-segments": MediaUtils.convertSegments(this.playedSegments),
       };
-      console.log('initPageOut', result)
+      // console.log('initPageOut', result)
       return result
     }
     this.currentMedia = null;

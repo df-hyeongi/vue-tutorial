@@ -3,12 +3,13 @@ import { MediaUtils } from "./media-utils";
 
 export abstract class BaseMediaEventService implements MediaEvent {
   // TODO: 전역으로 사용되는 변수들 최대한 제거해서 구현
-  protected currentMedia: HTMLMediaElement | null = null;
+  private _currentMedia: HTMLMediaElement | null = null;
+  private _playedSegments: [number, number][] = [];
+  private _playTime = 0;
+  private _timeFrom = 0;
+  private _pausePlayTime = 0;
+  private _seeking = false
   protected sessionStartTime = 0;
-  protected playTime = 0;
-  protected timeFrom = 0;
-  protected pausePlayTime = 0;
-  protected playedSegments: [number, number][] = [];
 
   protected initSessionStartTime(): void {
     if (!this.sessionStartTime) {
@@ -21,50 +22,102 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @param media 
    */
   protected initCurrentMedia(media: HTMLMediaElement) {
-    this.currentMedia = media
+    this._currentMedia = media
   }
 
   /**
-   * 현재 담은 media 반환
+   * getter media
    * @returns
    */
-  protected get getCurrentMedia() {
-    return this.currentMedia
+  protected get currentMedia(): HTMLMediaElement | null {
+    return this._currentMedia
   }
 
   /**
-   * 현재 담은 media 반환
+   * setter media 
    * @returns
    */
-  protected get getConvertedPlayedSegments() {
-    return MediaUtils.convertSegments(this.playedSegments)
+  protected set currentMedia(media: HTMLMediaElement | null) {
+    this._currentMedia = media
   }
 
   /**
-   * 마지막 재생 시간 업데이트
+   * getter playedSegments
+   * @returns
+   */
+  protected get playedSegments() {
+    return this._playedSegments
+  }
+
+  /**
+   * getter playedSegments
+   * @returns
+   */
+  protected set playedSegments(segments: [number, number][]) {
+    this._playedSegments = segments
+  }
+
+  /**
+   * getter playTime
+   * @returns
+   */
+  protected get playTime() {
+    return this._playTime
+  }
+
+  /**
+   * setter playTime
    * @param media
    * @returns
    */
-  protected updatePlayTime(time: number) {
-    this.playTime = MediaUtils.utilFloorToDecimals(time);
+  protected set playTime(time: number) {
+    this._playTime = time;
   }
 
   /**
-   * timeFrom 업데이트 
-   * @param media
+   * getter timeFrom
    * @returns
    */
-  protected updateTimeFrom(time: number) {
-    this.timeFrom = MediaUtils.utilFloorToDecimals(time)
+  protected get timeFrom() {
+    return this._timeFrom
   }
 
   /**
-   * pause시 플레이타임 업데이트
+   * setter timeFrom
    * @param media
    * @returns
    */
-  protected updatePausePlayTime(time: number) {
-    this.pausePlayTime = MediaUtils.utilFloorToDecimals(time);
+  protected set timeFrom(time: number) {
+    this._timeFrom = time
+  }
+
+  /**
+   * getter pausePlayTime
+   * @returns
+   */
+  protected get pausePlayTime() {
+    return this._pausePlayTime
+  }
+
+  /**
+   * setter pausePlayTime
+   * @param media
+   * @returns
+   */
+  protected set pausePlayTime(time: number) {
+    this._pausePlayTime = time;
+  }
+
+  /**
+     * seeking 상태 감지
+     * @param media
+     */
+  protected get seeking() {
+    return this._seeking
+  }
+
+  protected set seeking(seeking: boolean) {
+    this._seeking = seeking
   }
 
   /**
@@ -76,7 +129,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    */
   protected addPlayedSegment(playedSegments: [number, number][], lastPlayTime: number, currentTime: number): [number, number][] {
     const newSegment: [number, number] = [
-      lastPlayTime,
+      MediaUtils.utilFloorToDecimals(lastPlayTime),
       MediaUtils.utilFloorToDecimals(currentTime),
     ];
 
@@ -119,6 +172,17 @@ export abstract class BaseMediaEventService implements MediaEvent {
   }
 
   /**
+   * time 데이터 생성
+   * @param media
+   * @returns
+   */
+  protected createTimeData(media: HTMLMediaElement) {
+    return {
+      time: MediaUtils.utilFloorToDecimals(media.currentTime),
+    };
+  }
+
+  /**
    * result 데이터 생성
    * @param media
    * @returns
@@ -128,9 +192,9 @@ export abstract class BaseMediaEventService implements MediaEvent {
     const [startTime, endTime] = this.playedSegments[this.playedSegments.length - 1];
     return {
       duration: endTime - startTime,
-      time: MediaUtils.utilFloorToDecimals(media.currentTime),
       progress:
         media.duration > 0 ? Math.floor((media.currentTime / media.duration) * 100) / 100 : 0,
+      ...this.createTimeData(media),
     };
   }
 
@@ -170,6 +234,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
   abstract createPlayEvent(media: HTMLMediaElement): any;
   abstract createPauseEvent(media: HTMLMediaElement): any;
   abstract createSeekedEvent(media: HTMLMediaElement): any;
+  abstract createSeekingEvent(media: HTMLMediaElement): any;
   abstract initPageIn(media: HTMLMediaElement): any;
   abstract initPageOut(media: HTMLMediaElement): any;
   abstract createControlChangeEvent(media: HTMLMediaElement): any;

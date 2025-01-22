@@ -33,6 +33,14 @@ export abstract class BaseMediaEventService implements MediaEvent {
   }
 
   /**
+   * 현재 담은 media 반환
+   * @returns
+   */
+  protected get getConvertedPlayedSegments() {
+    return MediaUtils.convertSegments(this.playedSegments)
+  }
+
+  /**
    * 마지막 재생 시간 업데이트
    * @param media
    * @returns
@@ -73,19 +81,6 @@ export abstract class BaseMediaEventService implements MediaEvent {
     ];
 
     return [...playedSegments, newSegment];
-  }
-
-  /**
-   * 재생된 구간 업데이트
-   * @param currentTime 현재 재생 시간
-   */
-  protected updatePlayedSegments(): void {
-    const playedSegments = this.addPlayedSegment(
-      this.playedSegments,
-      this.playTime,
-      this.pausePlayTime
-    );
-    this.playedSegments = playedSegments;
   }
 
   // TODO: createSeekedEvent에 맞는 결과값에 상응하는 함수명으로 수정하기
@@ -129,15 +124,25 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @returns
    */
   protected createResultData(media: HTMLMediaElement) {
-    this.updatePlayedSegments();
+    if (this.playedSegments.length === 0) return
     const [startTime, endTime] = this.playedSegments[this.playedSegments.length - 1];
     return {
       duration: endTime - startTime,
       time: MediaUtils.utilFloorToDecimals(media.currentTime),
       progress:
         media.duration > 0 ? Math.floor((media.currentTime / media.duration) * 100) / 100 : 0,
-      "played-segments": [MediaUtils.convertSegments(this.playedSegments)],
     };
+  }
+
+  /**
+   * playedSegements 데이터 생성
+   */
+  protected createPlayedSegmentsData() {
+    const playedSegments = this.addPlayedSegment(this.playedSegments, this.playTime, this.pausePlayTime)
+    this.playedSegments = playedSegments
+    return {
+      "played-segments": [MediaUtils.convertSegments(playedSegments)],
+    }
   }
 
   /**

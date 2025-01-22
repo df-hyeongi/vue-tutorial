@@ -1,5 +1,4 @@
 import { BaseMediaEventService } from "./base-media-event-service";
-import { MediaUtils } from "./media-utils";
 import { Debouncer } from "./debounce";
 
 export class MediaEventService extends BaseMediaEventService {
@@ -28,6 +27,7 @@ export class MediaEventService extends BaseMediaEventService {
     const result = {
       ...this.createObjectData(media),
       ...this.createResultData(media),
+      ...this.createPlayedSegmentsData(),
     };
     console.log("pause result", result);
   }
@@ -70,11 +70,13 @@ export class MediaEventService extends BaseMediaEventService {
 
   initPageOut() {
     if (this.getCurrentMedia) {
-      return {
+      const result = {
         ...this.createObjectData(this.getCurrentMedia),
         ...this.createResultData(this.getCurrentMedia),
-        "session-duration": MediaUtils.convertSegments(this.playedSegments),
+        "played-segments": this.getConvertedPlayedSegments,
       };
+      console.log('initPageOut', result)
+      return result
     }
     this.currentMedia = null;
     this.sessionStartTime = 0;

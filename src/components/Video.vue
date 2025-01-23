@@ -11,6 +11,8 @@
     @volumechange="onControlChange"
     @ratechange="onControlChange"
     @fullscreenchange="onControlChange"
+    @canplay="onCanPlay"
+    @waiting="onWaiting"
     ref="videoRef"
     preload="auto"
     controls
@@ -61,6 +63,14 @@ function handleBeforeUnload() {
 
 function onControlChange(e: Event) {
   mediaEventService.createControlChangeEvent(e.target as HTMLVideoElement);
+}
+
+function onCanPlay() {
+  mediaEventService.watchCanPlayEvent(true);
+}
+
+function onWaiting() {
+  mediaEventService.watchCanPlayEvent(false);
 }
 
 onMounted(() => {

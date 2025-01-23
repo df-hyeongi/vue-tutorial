@@ -8,7 +8,7 @@ export class MediaEventService extends BaseMediaEventService {
     // 탐색중에 play 이벤트 발생 제어 
     // pause와는 다르게 play에서는 media.seeking 상태가 변하지 않음. 조건에 this.seeking만 추가
     if (this.seeking) {
-      this.updatePlayTime(media.currentTime)
+      // this.updatePlayTime(media.currentTime)
       return
     }
 
@@ -26,7 +26,7 @@ export class MediaEventService extends BaseMediaEventService {
   // pause에서는 media.seeking 상태가 변함
   createPauseEvent(media: HTMLMediaElement) {
     if (this.seeking || media.seeking) {
-      this.updatePauseTime(media.currentTime)
+      // this.updatePauseTime(media.currentTime)
       return
     }
 
@@ -80,7 +80,7 @@ export class MediaEventService extends BaseMediaEventService {
       ...this.createObjectData(media),
       ...this.createContextData(media),
     };
-    // console.log("initPageIn", result);
+    console.log("initPageIn", result);
   }
 
   initPageOut() {
@@ -90,7 +90,7 @@ export class MediaEventService extends BaseMediaEventService {
         ...this.createResultData(this.currentMedia, this.playedSegments),
         "played-segments": MediaUtils.convertSegments(this.playedSegments),
       };
-      // console.log('initPageOut', result)
+      console.log('initPageOut', result)
       return result
     }
     this.currentMedia = null;

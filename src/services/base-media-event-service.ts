@@ -208,7 +208,13 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @param media
    * @returns
    */
-  protected createContextData(media: HTMLMediaElement) {
+  protected createContextData(media: HTMLMediaElement): {
+    length: number;
+    format: string;
+    speed: string;
+    volume: number;
+    fullScreen?: boolean;
+  } {
     const fileName = this.createObjectData(media).fileName;
     const length = MediaUtils.utilFloorToDecimals(media.duration);
     const speed = `${media.playbackRate}x`;
@@ -216,13 +222,22 @@ export abstract class BaseMediaEventService implements MediaEvent {
     const isFullScreen = !!(
       document.fullscreenElement === media || (document as any).webkitFullscreenElement === media
     );
-    return {
+
+    const result = {
       length,
       format: MediaUtils.utilMediaFormat(fileName),
       speed,
       volume: media.muted ? 0 : volume,
+    }
+
+    if (media instanceof HTMLVideoElement) return {
+      ...result,
       fullScreen: isFullScreen,
-    };
+    }
+    if (media instanceof HTMLAudioElement) return {
+      ...result,
+    }
+    return result
   }
 
   abstract createPlayEvent(media: HTMLMediaElement): any;

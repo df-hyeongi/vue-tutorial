@@ -5,11 +5,14 @@
     @click="onClick"
     @play="onPlay"
     @pause="onPause"
+    @seeking="onSeeking"
     @seeked="onSeeked"
     @loadedmetadata="onLoadedData"
     @volumechange="onControlChange"
     @ratechange="onControlChange"
     @fullscreenchange="onControlChange"
+    @canplay="onCanPlay"
+    @waiting="onWaiting"
     controls
   >
     <source src="./19B.mp3" type="audio/mp3" />
@@ -39,6 +42,10 @@ function onSeeked(e: Event) {
   mediaEventService.createSeekedEvent(e.target as HTMLVideoElement);
 }
 
+function onSeeking(e: Event) {
+  mediaEventService.createSeekingEvent(e.target as HTMLVideoElement);
+}
+
 function onLoadedData(e: Event) {
   mediaEventService.initPageIn(e.target as HTMLVideoElement);
 }
@@ -52,13 +59,21 @@ function onControlChange(e: Event) {
   mediaEventService.createControlChangeEvent(e.target as HTMLVideoElement);
 }
 
+function onCanPlay() {
+  mediaEventService.watchCanPlayEvent(true);
+}
+
+function onWaiting() {
+  mediaEventService.watchCanPlayEvent(false);
+}
+
 onMounted(() => {
   window.addEventListener("beforeunload", handleBeforeUnload);
   // document.addEventListener("visibilitychange", handleBeforeUnload);
 });
 
 onUnmounted(() => {
-  window.addEventListener("beforeunload", handleBeforeUnload);
+  // window.addEventListener("beforeunload", handleBeforeUnload);
   // document.removeEventListener("visibilitychange", handleBeforeUnload);
 });
 </script>

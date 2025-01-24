@@ -152,11 +152,13 @@ export abstract class BaseMediaEventService implements MediaEvent {
     const mediaUrl = media.currentSrc || media.src;
     const fileName = this.mediaUtils.utilMediaFileName(mediaUrl);
     const mediaSessionId = "438109af-ea37-4dbb-8df0-d9d1bbd9d5c2";
+    const type = media instanceof HTMLVideoElement ? "video" : "audio";
 
     return {
       fileName,
       mediaUrl,
       mediaSessionId,
+      type
     };
   }
 

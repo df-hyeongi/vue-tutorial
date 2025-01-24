@@ -10,6 +10,10 @@ export abstract class BaseMediaEventService implements MediaEvent {
   private _seeking = false
   private _canPlay = false;
 
+
+  constructor(
+    private mediaUtils: typeof MediaUtils = MediaUtils
+  ) { }
   /**
    * init시에 담는 media 객체
    * @param media 
@@ -122,8 +126,8 @@ export abstract class BaseMediaEventService implements MediaEvent {
    */
   protected addPlayedSegments(playedSegments: [number, number][], lastPlayTime: number, currentTime: number): [number, number][] {
     const newSegment: [number, number] = [
-      MediaUtils.utilFloorToDecimals(lastPlayTime),
-      MediaUtils.utilFloorToDecimals(currentTime),
+      this.mediaUtils.utilFloorToDecimals(lastPlayTime),
+      this.mediaUtils.utilFloorToDecimals(currentTime),
     ];
 
     return [...playedSegments, newSegment];
@@ -146,7 +150,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    */
   protected createObjectData(media: HTMLMediaElement) {
     const mediaUrl = media.currentSrc || media.src;
-    const fileName = MediaUtils.utilMediaFileName(mediaUrl);
+    const fileName = this.mediaUtils.utilMediaFileName(mediaUrl);
     const mediaSessionId = "438109af-ea37-4dbb-8df0-d9d1bbd9d5c2";
 
     return {
@@ -163,7 +167,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    */
   protected createTimeData(media: HTMLMediaElement) {
     return {
-      time: MediaUtils.utilFloorToDecimals(media.currentTime),
+      time: this.mediaUtils.utilFloorToDecimals(media.currentTime),
     };
   }
 
@@ -173,9 +177,10 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @returns
    */
   protected createResultData(media: HTMLMediaElement, playedSegments: [number, number][]) {
+    if (playedSegments.length === 0) return
     const [startTime, endTime] = playedSegments[playedSegments.length - 1];
     return {
-      duration: MediaUtils.formatDurationToISO8601(endTime - startTime),
+      duration: this.mediaUtils.formatDurationToISO8601(endTime - startTime),
       progress:
         media.duration > 0 ? Math.floor((media.currentTime / media.duration) * 100) / 100 : 0,
       ...this.createTimeData(media),
@@ -187,7 +192,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    */
   protected createPlayedSegmentsData(playedSegments: [number, number][]) {
     return {
-      "played-segments": MediaUtils.convertSegments(playedSegments),
+      "played-segments": this.mediaUtils.convertSegments(playedSegments),
     }
   }
 
@@ -198,8 +203,8 @@ export abstract class BaseMediaEventService implements MediaEvent {
    */
   protected createSeekedData(currentTime: number) {
     return {
-      "time-from": MediaUtils.utilFloorToDecimals(this.prevPlayTime),
-      "time-to": MediaUtils.utilFloorToDecimals(MediaUtils.utilFloorToDecimals(currentTime)),
+      "time-from": this.mediaUtils.utilFloorToDecimals(this.prevPlayTime),
+      "time-to": this.mediaUtils.utilFloorToDecimals(this.mediaUtils.utilFloorToDecimals(currentTime)),
     };
   }
 
@@ -216,16 +221,16 @@ export abstract class BaseMediaEventService implements MediaEvent {
     fullScreen?: boolean;
   } {
     const fileName = this.createObjectData(media).fileName;
-    const length = MediaUtils.utilFloorToDecimals(media.duration);
+    const length = this.mediaUtils.utilFloorToDecimals(media.duration);
     const speed = `${media.playbackRate}x`;
-    const volume = MediaUtils.utilFloorToDecimals(media.volume);
+    const volume = this.mediaUtils.utilFloorToDecimals(media.volume);
     const isFullScreen = !!(
       document.fullscreenElement === media || (document as any).webkitFullscreenElement === media
     );
 
     const result = {
       length,
-      format: MediaUtils.utilMediaFormat(fileName),
+      format: this.mediaUtils.utilMediaFormat(fileName),
       speed,
       volume: media.muted ? 0 : volume,
     }

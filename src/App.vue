@@ -1,9 +1,11 @@
 <template>
   <div>
-    <Video />
+    <!-- <Video /> -->
+    <Audio />
   </div>
 </template>
 
 <script setup>
-import Video from "./components/Video.vue";
+// import Video from "./components/Video.vue";
+import Audio from "./components/Audio.vue";
 </script>

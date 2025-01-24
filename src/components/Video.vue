@@ -13,13 +13,15 @@
     @fullscreenchange="onControlChange"
     @canplay="onCanPlay"
     @waiting="onWaiting"
+    @ended="onEnded"
     ref="videoRef"
     preload="auto"
     controls
   >
     <!-- <source src="./39611.mp4" type="video/mp4" /> -->
+    <!-- https://d-lcms-res.ds.daekyo.in/resources/724/2024-07-10/null.mp4?t=Fri Jan 24 2025 16:14:35 GMT+0900 (한국 표준시) -->
     <source
-      src="https://d-lcms-res.ds.daekyo.in/resources/724/2024-08-21/39611.mp4?t=Mon Jan 20 2025 13:53:58 GMT+0900 (한국 표준시)"
+      src="https://d-lcms-res.ds.daekyo.in/resources/724/2024-07-10/null.mp4?t=Fri Jan 24 2025 16:14:35 GMT+0900 (한국 표준시)"
       type="video/mp4"
     />
   </video>
@@ -71,6 +73,11 @@ function onCanPlay() {
 
 function onWaiting() {
   mediaEventService.watchCanPlayEvent(false);
+}
+
+function onEnded(e: Event) {
+  console.log("끝!");
+  mediaEventService.watchEnded(true);
 }
 
 onMounted(() => {

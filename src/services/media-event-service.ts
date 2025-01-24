@@ -5,6 +5,22 @@ import { MediaUtils } from "./media-utils";
 export class MediaEventService extends BaseMediaEventService {
   createPlayEvent(media: HTMLMediaElement) {
     console.log('this.seeking', this.seeking)
+    console.log('this.isEnded', this.isEnded)
+    if (this.isEnded) {
+      console.log('여기임')
+      this.playedSegments = []
+      this.isEnded = false
+      this.updatePlayTime(media.currentTime)
+
+      const result = {
+        ...this.createObjectData(media),
+        ...this.createContextData(media),
+        ...this.createTimeData(media),
+      };
+      console.log('play result', result)
+      return result;
+    }
+
     // 탐색중에 play 이벤트 발생 제어 
     // pause와는 다르게 play에서는 media.seeking 상태가 변하지 않음. 조건에 this.seeking만 추가
     if (this.seeking) {
@@ -42,18 +58,20 @@ export class MediaEventService extends BaseMediaEventService {
   }
 
   createSeekedEvent(media: HTMLMediaElement) {
-    // TODO: 드래그 이벤트를 막아야 한다면?
-    Debouncer.debounce(() => {
-      // seeked에서는 seeking 상태가 변하지 않음(false)
-      this.seeking = media.seeking
-      const result = {
-        ...this.createObjectData(media),
-        ...this.createSeekedData(media.currentTime)
-      }
-      this.prevPlayTime = media.currentTime
-      // TODO: 추후 return으로 처리해야함
-      console.log('seeking result', result)
-    }, 300)
+    if (!this.isEnded) {
+      // TODO: 드래그 이벤트를 막아야 한다면?
+      Debouncer.debounce(() => {
+        // seeked에서는 seeking 상태가 변하지 않음(false)
+        this.seeking = media.seeking
+        const result = {
+          ...this.createObjectData(media),
+          ...this.createSeekedData(media.currentTime)
+        }
+        this.prevPlayTime = media.currentTime
+        // TODO: 추후 return으로 처리해야함
+        console.log('seeking result', result)
+      }, 300)
+    }
   }
 
   createSeekingEvent(media: HTMLMediaElement) {
@@ -98,5 +116,9 @@ export class MediaEventService extends BaseMediaEventService {
 
   watchCanPlayEvent(canPlay: boolean) {
     this.canPlay = canPlay
+  }
+
+  watchEnded(ended: boolean) {
+    this.isEnded = ended
   }
 }

@@ -9,7 +9,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
   private _pausePlayTime = 0;
   private _seeking = false
   private _canPlay = false;
-
+  private _isEnded = false;
 
   constructor(
     private mediaUtils: typeof MediaUtils = MediaUtils
@@ -97,6 +97,17 @@ export abstract class BaseMediaEventService implements MediaEvent {
 
   protected set canPlay(canPlay: boolean) {
     this._canPlay = canPlay
+  }
+
+  /**
+   * 동영상이 끝났음
+   */
+  protected get isEnded() {
+    return this._isEnded
+  }
+
+  protected set isEnded(ended: boolean) {
+    this._isEnded = ended
   }
 
   /**
@@ -194,7 +205,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    */
   protected createPlayedSegmentsData(playedSegments: [number, number][]) {
     return {
-      "played-segments": this.mediaUtils.convertSegments(playedSegments),
+      playedSegments: this.mediaUtils.convertSegments(playedSegments),
     }
   }
 
@@ -255,4 +266,5 @@ export abstract class BaseMediaEventService implements MediaEvent {
   abstract initPageOut(media: HTMLMediaElement): any;
   abstract createControlChangeEvent(media: HTMLMediaElement): any;
   abstract watchCanPlayEvent(canPlay: boolean): any;
+  abstract watchEnded(ended: boolean): any;
 }

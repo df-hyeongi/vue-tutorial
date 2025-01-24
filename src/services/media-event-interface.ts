@@ -7,5 +7,6 @@ export interface MediaEvent {
   createSeekingEvent(media: HTMLMediaElement): any;
   createControlChangeEvent(media: HTMLMediaElement): any;
   watchCanPlayEvent(canPlay: boolean): any;
+  watchEnded(ended: boolean): any;
 }
 

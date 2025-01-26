@@ -122,6 +122,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @param currentTime
    */
   protected updatePauseTime(currentTime: number) {
+    this.playTime = this.pausePlayTime
     this.prevPlayTime = currentTime
     this.pausePlayTime = currentTime
   }
@@ -132,6 +133,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
   protected resetPlayedSegments() {
     this.playedSegments = []
     this.playTime = 0
+    this.pausePlayTime = 0
   }
 
   /**

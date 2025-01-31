@@ -7,7 +7,6 @@ export class MediaEventService extends BaseMediaEventService {
     // 탐색중에 play 이벤트 발생 제어
     // pause와는 다르게 play에서는 media.seeking 상태가 변하지 않음. 조건에 this.seeking만 추가
     if (this.seeking) {
-      // this.updatePlayTime(media.currentTime)
       return
     }
 
@@ -18,13 +17,10 @@ export class MediaEventService extends BaseMediaEventService {
       ...this.createContextData(media),
       ...this.createTimeData(media),
     }
-    console.log("play currentTime", media.currentTime)
     return result
   }
 
-  // pause에서는 media.seeking 상태가 변함
   createPauseEvent(media: HTMLMediaElement) {
-    console.log("pause currentTime", media.currentTime)
     // 비디오 종료 시 정지(pause) 이벤트에서 발생하는 재생 구간 초기화
     if (media.currentTime === media.duration) {
       this.updatePauseTime(media.currentTime)
@@ -34,10 +30,12 @@ export class MediaEventService extends BaseMediaEventService {
         this.pausePlayTime
       )
       const result = this.pauseResult(media)
-      // console.log('ended + pause result', result);
+      this.finalPauseState = result
       this.resetPlayedSegments()
       return result
     }
+
+    // 탐색중에 pause 이벤트 발생 제어
     if (this.seeking || media.seeking) {
       return
     }
@@ -55,6 +53,11 @@ export class MediaEventService extends BaseMediaEventService {
 
   createSeekedEvent(media: HTMLMediaElement) {
     // TODO: 드래그 이벤트를 막아야 한다면?
+    // 비디오 종료 후 재시작시 seeking 이벤트가 발생 제어
+    if (media.currentTime === 0) {
+      this.seeking = media.seeking
+      return
+    }
     Debouncer.debounce(() => {
       // seeked에서는 seeking 상태가 변하지 않음(false)
       this.seeking = media.seeking
@@ -64,7 +67,7 @@ export class MediaEventService extends BaseMediaEventService {
       }
       this.prevPlayTime = media.currentTime
       // TODO: 추후 return으로 처리해야함
-      // console.log('seeking result', result);
+      console.log('seeking result', result);
     }, 300)
   }
 
@@ -100,7 +103,7 @@ export class MediaEventService extends BaseMediaEventService {
       const result = {
         ...this.createObjectData(this.currentMedia),
         ...this.createResultData(this.currentMedia, this.playedSegments),
-        "played-segments": MediaUtils.convertSegments(this.playedSegments),
+        "playedSegments": MediaUtils.convertSegments(this.playedSegments),
       }
       // console.log('initPageOut', result);
       return result
@@ -113,6 +116,8 @@ export class MediaEventService extends BaseMediaEventService {
   }
 
   watchEnded(ended: boolean) {
-    // this.isEnded = ended;
+    if (this.currentMedia) {
+      return this.finalPauseState
+    }
   }
 }

@@ -3,6 +3,7 @@ import { MediaUtils } from "./media-utils"
 
 export abstract class BaseMediaEventService implements MediaEvent {
   private _currentMedia: HTMLMediaElement | null = null
+  private _finalPauseState: any = null
   private _playedSegments: [number, number][] = []
   private _playTime = 0
   private _prevPlayTime = 0
@@ -11,7 +12,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
   private _canPlay = false
   private _isEnded = false
 
-  constructor(private mediaUtils: typeof MediaUtils = MediaUtils) {}
+  constructor(private mediaUtils: typeof MediaUtils = MediaUtils) { }
   /**
    * init시에 담는 media 객체
    * @param media
@@ -109,6 +110,17 @@ export abstract class BaseMediaEventService implements MediaEvent {
   }
 
   /**
+   * 최종 결과 값
+   */
+  protected get finalPauseState() {
+    return this._finalPauseState
+  }
+
+  protected set finalPauseState(state: any) {
+    this._finalPauseState = state
+  }
+
+  /**
    * 재생(play) 시간 업데이트
    * @param currentTime
    */
@@ -122,7 +134,7 @@ export abstract class BaseMediaEventService implements MediaEvent {
    * @param currentTime
    */
   protected updatePauseTime(currentTime: number) {
-    this.playTime = this.pausePlayTime
+    // this.playTime = this.pausePlayTime
     this.prevPlayTime = currentTime
     this.pausePlayTime = currentTime
   }

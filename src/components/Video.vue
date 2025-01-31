@@ -76,8 +76,8 @@ function onWaiting() {
 }
 
 function onEnded(e: Event) {
-  console.log("끝!");
-  mediaEventService.watchEnded(true);
+  const result = mediaEventService.watchEnded(true);
+  localStorage.setItem("sessionStartTime", JSON.stringify(result));
 }
 
 onMounted(() => {
@@ -87,7 +87,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   console.log("onUnmounted");
-  // window.addEventListener("beforeunload", handleBeforeUnload);
+  window.addEventListener("beforeunload", handleBeforeUnload);
   // document.removeEventListener("visibilitychange", handleBeforeUnload.value);
 });
 </script>
